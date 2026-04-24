@@ -34,19 +34,19 @@
 
       <!-- Stats -->
       <div class="stats-row">
-        <div class="stat">
+        <div class="stat stat-secondary">
           <div class="stat-val" id="s-rev" style="color:var(--green)">$0</div>
           <div class="stat-lbl">COLLECTED</div>
         </div>
-        <div class="stat">
+        <div class="stat stat-primary">
           <div class="stat-val" id="s-pip" style="color:var(--accent)">$0</div>
           <div class="stat-lbl">PIPELINE</div>
         </div>
-        <div class="stat">
+        <div class="stat stat-secondary">
           <div class="stat-val" id="s-bld" style="color:var(--orange)">0</div>
           <div class="stat-lbl">ACTIVE BUILDS</div>
         </div>
-        <div class="stat">
+        <div class="stat stat-secondary">
           <div class="stat-val" id="s-con" style="color:var(--blue)">0</div>
           <div class="stat-lbl">CONTACTED</div>
         </div>
@@ -64,7 +64,10 @@
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <span class="sidebar-label">// LEADS</span>
-          <span class="lead-count" id="lead-count">0</span>
+          <div class="sidebar-tools">
+            <button class="sort-btn" id="sort-btn" type="button" onclick="togglePrioritySort()">SORT: DEFAULT</button>
+            <span class="lead-count" id="lead-count">0</span>
+          </div>
         </div>
         <div class="lead-list" id="lead-list"></div>
       </aside>

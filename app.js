@@ -22,6 +22,7 @@ const PAGES = [
 const STACKS    = ['HTML', 'React', 'Next.js'];
 const DELIVERY  = ['Design', 'Build', 'Review', 'Delivered'];
 const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'];
+const PRIORITY_SORT_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 const PRICE_LIMIT = 10000;
 
 
@@ -290,36 +291,38 @@ const leads = [
 // ── State ──────────────────────────────────────────────────────
 
 let selectedId = null;
+let sortMode = 'default';
 const siteEditState = {};
 const siteDraftState = {};
 const listDraftState = { issues: {}, scope: {} };
 const listEditIndexState = { issues: {}, scope: {} };
+const leadOriginalOrder = new Map(leads.map((lead, index) => [lead.id, index]));
 
 
 // ── Score helpers ──────────────────────────────────────────────
 
 function scoreColor(s) {
-  if (s === 0) return '#f87171';
-  if (s < 30)  return '#fb923c';
-  if (s < 50)  return '#facc15';
-  if (s < 70)  return '#4ade80';
-  return '#86efac';
+  if (s === 0) return '#b65d4a';
+  if (s < 30)  return '#b67a3a';
+  if (s < 50)  return '#a5894d';
+  if (s < 70)  return '#738255';
+  return '#4f7f5f';
 }
 
 function scoreGradient(s) {
-  if (s === 0) return 'linear-gradient(90deg, #ef4444, #f87171)';
-  if (s < 30)  return 'linear-gradient(90deg, #f97316, #fb923c)';
-  if (s < 50)  return 'linear-gradient(90deg, #eab308, #facc15)';
-  if (s < 70)  return 'linear-gradient(90deg, #22c55e, #4ade80)';
-  return 'linear-gradient(90deg, #4ade80, #86efac)';
+  if (s === 0) return 'linear-gradient(90deg, #9f4c3d, #b65d4a)';
+  if (s < 30)  return 'linear-gradient(90deg, #9d6432, #b67a3a)';
+  if (s < 50)  return 'linear-gradient(90deg, #8d7240, #a5894d)';
+  if (s < 70)  return 'linear-gradient(90deg, #66754b, #738255)';
+  return 'linear-gradient(90deg, #406650, #4f7f5f)';
 }
 
 function scoreGrade(s) {
-  if (s < 20) return { g: 'F', c: '#f87171' };
-  if (s < 40) return { g: 'D', c: '#fb923c' };
-  if (s < 60) return { g: 'C', c: '#facc15' };
-  if (s < 80) return { g: 'B', c: '#4ade80' };
-  return { g: 'A', c: '#86efac' };
+  if (s < 20) return { g: 'F', c: '#b65d4a' };
+  if (s < 40) return { g: 'D', c: '#b67a3a' };
+  if (s < 60) return { g: 'C', c: '#a5894d' };
+  if (s < 80) return { g: 'B', c: '#738255' };
+  return { g: 'A', c: '#4f7f5f' };
 }
 
 function statusClass(status) {
@@ -390,6 +393,23 @@ function normalizeExternalUrl(value) {
   }
 }
 
+function siteDisplayText(value) {
+  const href = normalizeExternalUrl(value);
+  const raw = String(value ?? '').trim();
+  if (!href) return raw || 'No website';
+
+  try {
+    const parsed = new URL(href);
+    const host = parsed.hostname.replace(/^www\./, '');
+    const path = parsed.pathname && parsed.pathname !== '/'
+      ? parsed.pathname.replace(/\/$/, '')
+      : '';
+    return `${host}${path}`;
+  } catch {
+    return raw || 'No website';
+  }
+}
+
 function isSiteEditing(lead) {
   return siteEditState[lead.id] ?? !lead.url;
 }
@@ -441,6 +461,14 @@ function syncPriceControls(id) {
 
   const summary = editor.querySelector('.price-summary');
   if (summary) summary.textContent = formatPriceRange(lead);
+
+  document.querySelectorAll(`[data-price-mid="${id}"]`).forEach(el => {
+    el.textContent = formatMoney(midPrice(lead));
+  });
+
+  document.querySelectorAll(`[data-price-range="${id}"]`).forEach(el => {
+    el.textContent = formatPriceRange(lead);
+  });
 }
 
 function syncScoreControls(id) {
@@ -455,6 +483,28 @@ function syncScoreControls(id) {
     const grade = scoreGrade(lead.score);
     meta.textContent = `GRADE ${grade.g} · ${lead.score}/100`;
     meta.style.color = scoreColor(lead.score);
+  }
+
+  const grade = scoreGrade(lead.score);
+  const heroScore = document.querySelector(`[data-hero-score="${id}"]`);
+  const heroScoreNote = document.querySelector(`[data-hero-score-note="${id}"]`);
+  const heroScoreBar = document.querySelector(`[data-hero-score-bar="${id}"]`);
+  const heroGrade = document.querySelector(`[data-hero-grade="${id}"]`);
+
+  if (heroScore) {
+    heroScore.textContent = `${lead.score}/100`;
+    heroScore.style.color = scoreColor(lead.score);
+  }
+
+  if (heroScoreNote) heroScoreNote.textContent = `${grade.g} grade potential`;
+  if (heroScoreBar) {
+    heroScoreBar.style.width = `${lead.score}%`;
+    heroScoreBar.style.background = scoreGradient(lead.score);
+  }
+
+  if (heroGrade) {
+    heroGrade.textContent = grade.g;
+    heroGrade.style.color = scoreColor(lead.score);
   }
 }
 
@@ -509,7 +559,7 @@ function renderSiteField(lead) {
       <div class="site-panel">
         <div class="site-link-shell">
           ${savedHref
-            ? `<a class="field-link" href="${escapeHTML(savedHref)}" target="_blank" rel="noopener noreferrer">${escapeHTML(lead.url.trim())}</a>`
+            ? `<a class="field-link" href="${escapeHTML(savedHref)}" target="_blank" rel="noopener noreferrer">${escapeHTML(siteDisplayText(lead.url))}</a>`
             : '<span class="empty-list-note">No site saved yet.</span>'}
         </div>
       </div>
@@ -603,21 +653,68 @@ function cycleStatus(id, event) {
   if (selectedId === id) renderDetail(id);
 }
 
+function cyclePriority(id, event) {
+  event.stopPropagation();
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+
+  const currentIndex = PRIORITIES.indexOf(lead.priority);
+  const nextPriority = PRIORITIES[(currentIndex + 1) % PRIORITIES.length];
+  setPriority(id, nextPriority);
+}
+
+function updateSortButton() {
+  const button = document.getElementById('sort-btn');
+  if (!button) return;
+
+  const active = sortMode === 'priority';
+  button.textContent = active ? 'SORT: PRIORITY' : 'SORT: DEFAULT';
+  button.classList.toggle('active', active);
+}
+
+function getRenderedLeads() {
+  const ordered = [...leads];
+
+  if (sortMode === 'priority') {
+    ordered.sort((a, b) => {
+      const priorityDiff = (PRIORITY_SORT_ORDER[a.priority] ?? 99) - (PRIORITY_SORT_ORDER[b.priority] ?? 99);
+      if (priorityDiff !== 0) return priorityDiff;
+      return leadOriginalOrder.get(a.id) - leadOriginalOrder.get(b.id);
+    });
+    return ordered;
+  }
+
+  ordered.sort((a, b) => leadOriginalOrder.get(a.id) - leadOriginalOrder.get(b.id));
+  return ordered;
+}
+
+function togglePrioritySort() {
+  sortMode = sortMode === 'priority' ? 'default' : 'priority';
+  updateSortButton();
+  renderList();
+}
+
 
 // ── Render sidebar list ────────────────────────────────────────
 
 function renderList() {
   document.getElementById('lead-count').textContent = leads.length;
+  updateSortButton();
 
-  document.getElementById('lead-list').innerHTML = leads.map(lead => {
+  document.getElementById('lead-list').innerHTML = getRenderedLeads().map(lead => {
     const g = scoreGrade(lead.score);
     const isActive = selectedId === lead.id;
+    const siteText = siteDisplayText(lead.url);
 
     return `
       <div class="lead-card${isActive ? ' active' : ''}" onclick="selectLead(${lead.id})">
         <div class="lead-top">
           <div class="lead-name">${escapeHTML(lead.name)}</div>
-          <span class="badge ${lead.priority}">${lead.priority}</span>
+          <span class="badge badge-action ${lead.priority}" onclick="cyclePriority(${lead.id}, event)" title="Click to change priority">${lead.priority}</span>
+        </div>
+        <div class="lead-meta-row">
+          <span class="lead-meta">${escapeHTML(siteText)}</span>
+          <span class="lead-meta lead-meta-price">${formatMoney(midPrice(lead))}</span>
         </div>
         <div class="score-row">
           <div class="score-bar">
@@ -661,12 +758,80 @@ function renderDetail(id) {
   const issuesEditIndex = getListEditIndex(id, 'issues');
   const scopeDraft = getListDraft(id, 'scope');
   const scopeEditIndex = getListEditIndex(id, 'scope');
+  const siteText = siteDisplayText(lead.url);
 
   document.getElementById('content').innerHTML = `
+
+    <!-- Lead profile -->
+    <div class="section hero-card">
+      <div class="hero-shell">
+        <div class="hero-main">
+          <div class="hero-kicker">LEAD PROFILE</div>
+          <input
+            class="hero-name-input"
+            type="text"
+            value="${escapeHTML(lead.name)}"
+            aria-label="Business name"
+            oninput="setLeadText(${id}, 'name', this.value, true)"
+          >
+          <div class="hero-chip-row">
+            <span class="status-pill ${statusClass(lead.status)}" onclick="cycleStatus(${id}, event)">
+              ${lead.status}
+            </span>
+            <span class="badge badge-action ${lead.priority}" onclick="cyclePriority(${lead.id}, event)" title="Click to change priority">${lead.priority}</span>
+            <span class="hero-chip">Midpoint <strong data-price-mid="${id}">${formatMoney(midPrice(lead))}</strong></span>
+            <span class="hero-chip">Grade <strong data-hero-grade="${id}" style="color:${scoreColor(lead.score)}">${g.g}</strong></span>
+          </div>
+          <div class="hero-contact-grid">
+            <div class="hero-contact-card">
+              <div class="info-key">CURRENT SITE</div>
+              ${renderSiteField(lead)}
+            </div>
+            <div class="hero-contact-card">
+              <div class="info-key">PHONE</div>
+              <input
+                class="info-input"
+                type="text"
+                value="${escapeHTML(lead.phone)}"
+                aria-label="Phone number"
+                placeholder="(208) 000-0000"
+                oninput="setLeadText(${id}, 'phone', this.value)"
+              >
+            </div>
+          </div>
+        </div>
+        <div class="hero-metrics">
+          <div class="hero-metric">
+            <span class="hero-metric-label">Score</span>
+            <span class="hero-metric-value" data-hero-score="${id}" style="color:${scoreColor(lead.score)}">${lead.score}/100</span>
+            <span class="hero-metric-note" data-hero-score-note="${id}">${g.g} grade potential</span>
+            <div class="hero-score-track">
+              <div class="hero-score-fill" data-hero-score-bar="${id}" style="width:${lead.score}%; background:${scoreGradient(lead.score)}"></div>
+            </div>
+          </div>
+          <div class="hero-metric">
+            <span class="hero-metric-label">Range</span>
+            <span class="hero-metric-value" data-price-mid="${id}">${formatMoney(midPrice(lead))}</span>
+            <span class="hero-metric-note" data-price-range="${id}">${formatPriceRange(lead)}</span>
+          </div>
+          <div class="hero-metric">
+            <span class="hero-metric-label">Priority</span>
+            <span class="hero-metric-value" style="color:${priorityColor(lead.priority)}">${lead.priority}</span>
+            <span class="hero-metric-note">Current pursuit level</span>
+          </div>
+          <div class="hero-metric">
+            <span class="hero-metric-label">Web Presence</span>
+            <span class="hero-metric-value hero-metric-site">${escapeHTML(lead.url ? siteText : 'No site')}</span>
+            <span class="hero-metric-note">${lead.url ? 'Live site recorded' : 'Needs a website'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Pipeline status -->
     <div class="section">
       <div class="section-title">PIPELINE STATUS</div>
+      <div class="section-hint">Move the lead through the sales flow, then adjust score, priority, and pricing.</div>
       <div class="pipe-steps">
         ${STATUSES.map(s => {
           let cls = 'pipe-step';
@@ -676,16 +841,6 @@ function renderDetail(id) {
         }).join('')}
       </div>
       <div class="info-grid">
-        <div class="info-cell">
-          <div class="info-key">BUSINESS</div>
-          <input
-            class="info-input"
-            type="text"
-            value="${escapeHTML(lead.name)}"
-            aria-label="Business name"
-            oninput="setLeadText(${id}, 'name', this.value, true)"
-          >
-        </div>
         <div class="info-cell">
           <div class="info-key">SCORE</div>
           <input
@@ -702,21 +857,6 @@ function renderDetail(id) {
           <div class="field-meta score-meta" data-lead-id="${id}" style="color:${scoreColor(lead.score)}">
             GRADE ${g.g} · ${lead.score}/100
           </div>
-        </div>
-        <div class="info-cell info-cell-wide">
-          <div class="info-key">CURRENT SITE</div>
-          ${renderSiteField(lead)}
-        </div>
-        <div class="info-cell">
-          <div class="info-key">PHONE</div>
-          <input
-            class="info-input"
-            type="text"
-            value="${escapeHTML(lead.phone)}"
-            aria-label="Phone number"
-            placeholder="(208) 000-0000"
-            oninput="setLeadText(${id}, 'phone', this.value)"
-          >
         </div>
         <div class="info-cell info-cell-price">
           <div class="info-key">PRICE RANGE</div>
@@ -1006,6 +1146,7 @@ function saveSiteUrl(id) {
   lead.url = draft;
   siteDraftState[id] = draft;
   siteEditState[id] = false;
+  renderList();
   renderDetail(id);
 }
 
@@ -1133,6 +1274,7 @@ function setPriceBound(id, bound, value) {
   }
 
   calcStats();
+  renderList();
   syncPriceControls(id);
 }
 
@@ -1148,3 +1290,4 @@ function togglePaid(id) {
 
 renderList();
 calcStats();
+updateSortButton();
