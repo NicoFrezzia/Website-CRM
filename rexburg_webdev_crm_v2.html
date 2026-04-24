@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEB.OPS — Rexburg CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#05080e;
+  --bg2:#090e1a;
+  --card:#0c1220;
+  --card2:#101828;
+  --border:#152035;
+  --border2:#1c2e48;
+  --border3:#27405e;
+
+  --accent:#818cf8;
+  --accent-glow:rgba(129,140,248,.18);
+  --accent-soft:rgba(129,140,248,.08);
+
+  --red:#f87171;
+  --red-bg:rgba(248,113,113,.1);
+  --red-border:rgba(248,113,113,.25);
+
+  --orange:#fb923c;
+  --orange-bg:rgba(251,146,60,.1);
+  --orange-border:rgba(251,146,60,.25);
+
+  --green:#4ade80;
+  --green-bg:rgba(74,222,128,.1);
+  --green-border:rgba(74,222,128,.25);
+
+  --blue:#60a5fa;
+  --blue-bg:rgba(96,165,250,.1);
+  --blue-border:rgba(96,165,250,.25);
+
+  --text:#e2e8f0;
+  --text-sub:#94a3b8;
+  --text-muted:#64748b;
+  --text-dim:#2a3a52;
+
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'DM Mono','Fira Code',monospace;
+
+  --radius:10px;
+  --radius-sm:7px;
+  --radius-xs:5px;
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:13px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ─── App shell ─────────────────────────────────────────── */
+.app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  height:100dvh;
+  background:var(--bg);
+}
+
+/* Gradient accent strip */
+.accent-strip{
+  height:2px;
+  flex-shrink:0;
+  background:linear-gradient(90deg,#4f46e5 0%,#818cf8 40%,#c084fc 70%,#818cf8 100%);
+  background-size:200% 100%;
+  animation:shimmer 4s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0% 0%}100%{background-position:200% 0%}}
+
+/* ─── Topbar ─────────────────────────────────────────────── */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 18px;
+  height:54px;
+  flex-shrink:0;
+  background:rgba(5,8,14,.9);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  z-index:100;
+}
+
+.menu-btn{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border-radius:var(--radius-xs);
+  background:var(--card);
+  border:1px solid var(--border2);
+  cursor:pointer;
+  color:var(--text-muted);
+  transition:all .15s;
+  flex-shrink:0;
+}
+.menu-btn:hover{color:var(--text);border-color:var(--border3)}
+.menu-btn svg{width:16px;height:16px;display:block;pointer-events:none}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+  user-select:none;
+}
+.logo-wordmark{
+  font-family:var(--mono);
+  font-weight:500;
+  font-size:14px;
+  letter-spacing:3px;
+  background:linear-gradient(130deg,#818cf8 0%,#c084fc 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.logo-divider{width:1px;height:16px;background:var(--border3);flex-shrink:0}
+.logo-loc{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+}
+
+.stats-row{
+  display:flex;
+  gap:6px;
+  flex:1;
+  justify-content:flex-end;
+  overflow-x:auto;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.stats-row::-webkit-scrollbar{display:none}
+
+.stat{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:5px 14px;
+  min-width:92px;
+  flex-shrink:0;
+  cursor:default;
+  transition:border-color .2s,background .2s;
+}
+.stat:hover{border-color:var(--border2);background:var(--card2)}
+.stat-val{
+  font-family:var(--mono);
+  font-size:15px;
+  font-weight:500;
+  letter-spacing:.5px;
+  line-height:1.2;
+}
+.stat-lbl{
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--text-muted);
+  letter-spacing:1.5px;
+  margin-top:2px;
+}
+
+/* ─── Main layout ────────────────────────────────────────── */
+.main{
+  display:flex;
+  flex:1;
+  overflow:hidden;
+  position:relative;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────── */
+.sidebar{
+  width:284px;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  overflow:hidden;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+
+.sidebar-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 15px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.sidebar-label{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+}
+.lead-count{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--accent);
+  background:var(--accent-soft);
+  border:1px solid rgba(129,140,248,.22);
+  border-radius:20px;
+  padding:1px 9px;
+}
+
+.lead-list{overflow-y:auto;flex:1}
+
+/* ─── Lead card ──────────────────────────────────────────── */
+.lead-card{
+  padding:12px 15px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  transition:background .12s;
+  position:relative;
+}
+.lead-card::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:2px;
+  background:var(--accent);
+  opacity:0;
+  transition:opacity .15s;
+  border-radius:0 1px 1px 0;
+}
+.lead-card:hover{background:rgba(129,140,248,.045)}
+.lead-card:hover::before{opacity:.5}
+.lead-card.active{background:rgba(129,140,248,.09)}
+.lead-card.active::before{opacity:1}
+
+.lead-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:7px;
+}
+.lead-name{
+  font-size:11.5px;
+  font-weight:500;
+  color:var(--text);
+  line-height:1.35;
+}
+
+.badge{
+  font-family:var(--mono);
+  font-size:8px;
+  padding:2px 6px;
+  border-radius:3px;
+  letter-spacing:.5px;
+  flex-shrink:0;
+  margin-top:1px;
+  border:1px solid transparent;
+}
+.badge.HIGH{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.badge.MEDIUM{background:var(--orange-bg);color:var(--orange);border-color:var(--orange-border)}
+
+.score-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+.score-bar{
+  flex:1;
+  height:3px;
+  background:var(--border2);
+  border-radius:2px;
+  overflow:hidden;
+}
+.score-fill{height:100%;border-radius:2px}
+.score-grade{
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:500;
+  width:14px;
+  text-align:right;
+}
+.score-num{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--text-muted);
+  min-width:42px;
+  text-align:right;
+}
+
+/* ─── Status badge (pill) ────────────────────────────────── */
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-family:var(--mono);
+  font-size:9px;
+  padding:3px 9px;
+  border-radius:20px;
+  letter-spacing:.3px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:filter .15s,opacity .15s;
+  white-space:nowrap;
+}
+.status-pill:hover{filter:brightness(1.25)}
+.status-pill::before{
+  content:'';
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:currentColor;
+  flex-shrink:0;
+}
+
+.s-not  {background:rgba(100,116,139,.1); color:#64748b;  border-color:rgba(100,116,139,.22)}
+.s-con  {background:var(--blue-bg);        color:var(--blue);   border-color:var(--blue-border)}
+.s-meet {background:var(--orange-bg);      color:var(--orange); border-color:var(--orange-border)}
+.s-prop {background:var(--accent-soft);    color:var(--accent); border-color:rgba(129,140,248,.3)}
+.s-prog {background:var(--green-bg);       color:var(--green);  border-color:var(--green-border)}
+.s-comp {background:rgba(74,222,128,.18);  color:#6ee7a0;       border-color:rgba(74,222,128,.4)}
+.s-pass {background:rgba(248,113,113,.06); color:#6b4040;       border-color:rgba(248,113,113,.14)}
+
+/* ─── Content panel ──────────────────────────────────────── */
+.content{
+  flex:1;
+  overflow-y:auto;
+  background:var(--bg);
+  padding:18px;
+}
+
+.empty-state{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  gap:14px;
+  color:var(--text-muted);
+}
+.empty-icon{
+  width:48px;
+  height:48px;
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--border3);
+}
+.empty-state p{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:2.5px;
+  color:var(--text-muted);
+}
+
+/* ─── Detail sections ────────────────────────────────────── */
+.section{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:15px;
+  margin-bottom:10px;
+}
+.section:last-child{margin-bottom:0}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--accent);
+  letter-spacing:2.5px;
+  margin-bottom:13px;
+}
+.section-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:linear-gradient(to right,var(--border2),transparent);
+}
+
+/* Pipeline step pills */
+.pipe-steps{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.pipe-step{
+  font-family:var(--mono);
+  font-size:9px;
+  padding:4px 11px;
+  border-radius:20px;
+  cursor:pointer;
+  border:1px solid var(--border2);
+  color:var(--text-muted);
+  transition:all .15s;
+  white-space:nowrap;
+}
+.pipe-step:hover{border-color:var(--border3);color:var(--text-sub)}
+.pipe-step.act{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:500}
+.pipe-step.pass-s{border-color:rgba(248,113,113,.2);color:#5a3535;background:rgba(248,113,113,.04)}
+
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.info-cell{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xs);
+  padding:9px 11px;
+}
+.info-key{
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--text-muted);
+  letter-spacing:1px;
+  margin-bottom:3px;
+}
+.info-val{
+  font-size:12px;
+  color:var(--text);
+  font-weight:500;
+  word-break:break-word;
+}
+
+/* Issues */
+.issues{display:flex;flex-direction:column;gap:5px}
+.issue{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  font-size:12px;
+  color:var(--text-sub);
+  padding:8px 11px;
+  background:var(--bg2);
+  border-radius:var(--radius-xs);
+  border-left:2px solid var(--red);
+  line-height:1.45;
+}
+.issue-dot{color:var(--red);font-size:7px;margin-top:3px;flex-shrink:0}
+
+/* Pitch */
+.pitch-box{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-left:3px solid var(--accent);
+  border-radius:var(--radius-sm);
+  padding:13px 14px;
+  font-size:12.5px;
+  color:#9fb3cc;
+  line-height:1.72;
+  font-style:italic;
+}
+
+/* Scope */
+.scope-list{display:flex;flex-direction:column;gap:5px}
+.scope-item{
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  font-size:12px;
+  color:var(--text-sub);
+  padding:7px 11px;
+  background:var(--bg2);
+  border-radius:var(--radius-xs);
+  border-left:2px solid var(--blue);
+  line-height:1.45;
+}
+.scope-num{
+  font-family:var(--mono);
+  color:var(--blue);
+  font-size:9px;
+  flex-shrink:0;
+  margin-top:2px;
+  min-width:22px;
+}
+
+/* Sub-label */
+.sub-lbl{
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--text-muted);
+  letter-spacing:1.5px;
+  margin-bottom:7px;
+}
+
+/* Pages grid */
+.pages-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(88px,1fr));
+  gap:5px;
+  margin-bottom:13px;
+}
+.page-check{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xs);
+  padding:5px 9px;
+  cursor:pointer;
+  transition:all .15s;
+  user-select:none;
+}
+.page-check:hover{border-color:var(--border2)}
+.page-check.ck{border-color:var(--green-border);background:rgba(74,222,128,.055)}
+.page-check input{
+  accent-color:var(--green);
+  width:11px;height:11px;
+  flex-shrink:0;pointer-events:none;
+}
+.page-check span{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--text-muted);
+  pointer-events:none;
+}
+.page-check.ck span{color:var(--green)}
+
+/* Stack selector */
+.stack-opts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px}
+.stack-opt{
+  font-family:var(--mono);
+  font-size:10px;
+  padding:4px 13px;
+  border-radius:20px;
+  border:1px solid var(--border2);
+  color:var(--text-muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+.stack-opt:hover{border-color:var(--border3);color:var(--text-sub)}
+.stack-opt.sel{background:var(--accent-soft);border-color:rgba(129,140,248,.38);color:var(--accent)}
+
+/* Delivery steps */
+.deliv-steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px}
+.deliv-step{
+  font-family:var(--mono);
+  font-size:10px;
+  padding:4px 13px;
+  border-radius:20px;
+  border:1px solid var(--border2);
+  color:var(--text-muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+.deliv-step:hover{border-color:var(--orange-border);color:var(--orange)}
+.deliv-step.acd{border-color:var(--orange-border);color:var(--orange);background:var(--orange-bg)}
+.deliv-step.dnd{border-color:var(--green-border);color:var(--green);background:var(--green-bg)}
+
+/* Invoice row */
+.invoice-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:9px 13px;
+}
+.inv-cur{color:var(--green);font-family:var(--mono);font-size:15px;flex-shrink:0}
+.inv-input{
+  background:transparent;
+  border:none;
+  color:var(--green);
+  font-family:var(--mono);
+  font-size:15px;
+  width:120px;
+  outline:none;
+}
+.inv-input::placeholder{color:var(--text-dim)}
+.inv-right{margin-left:auto;display:flex;align-items:center;gap:9px}
+.paid-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1px;transition:color .2s}
+
+/* Toggle */
+.toggle{
+  width:36px;height:19px;
+  border-radius:10px;
+  background:var(--border2);
+  cursor:pointer;
+  position:relative;
+  transition:background .22s;
+  flex-shrink:0;
+}
+.toggle.on{background:rgba(74,222,128,.38)}
+.toggle-knob{
+  width:13px;height:13px;
+  border-radius:50%;
+  background:var(--text-muted);
+  position:absolute;
+  top:3px;left:3px;
+  transition:all .22s;
+  box-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+.toggle.on .toggle-knob{left:20px;background:var(--green)}
+
+/* Notes */
+.notes-area{
+  width:100%;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:11px 12px;
+  color:var(--text);
+  font-family:var(--font);
+  font-size:12.5px;
+  resize:vertical;
+  min-height:80px;
+  outline:none;
+  line-height:1.65;
+  transition:border-color .15s;
+}
+.notes-area:focus{border-color:var(--accent);background:var(--card2)}
+.notes-area::placeholder{color:var(--text-dim)}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--border3)}
+
+/* ─── Sidebar overlay (mobile) ───────────────────────────── */
+.sidebar-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:50;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+.sidebar-overlay.open{display:block}
+
+/* ─── Mobile ─────────────────────────────────────────────── */
+@media(max-width:768px){
+  .menu-btn{display:flex}
+
+  .topbar{padding:0 12px;gap:8px}
+  .stat{min-width:78px;padding:4px 10px}
+  .stat-val{font-size:13px}
+
+  .sidebar{
+    position:fixed;
+    left:0;
+    top:56px; /* accent strip + topbar */
+    bottom:0;
+    z-index:60;
+    transform:translateX(-100%);
+    width:min(284px,88vw);
+    box-shadow:6px 0 32px rgba(0,0,0,.7);
+  }
+  .sidebar.open{transform:translateX(0)}
+
+  .content{padding:13px}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .pages-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+}
+
+@media(max-width:460px){
+  .info-grid{grid-template-columns:1fr}
+  .stat{min-width:68px;padding:3px 8px}
+  .stat-val{font-size:12px}
+  .stat-lbl{font-size:7px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Shimmer accent strip -->
+  <div class="accent-strip"></div>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo">
+      <span class="logo-wordmark">WEB.OPS</span>
+      <div class="logo-divider"></div>
+      <span class="logo-loc">REXBURG ID</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-val" id="s-rev" style="color:var(--green)">$0</div>
+        <div class="stat-lbl">COLLECTED</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="s-pip" style="color:var(--accent)">$0</div>
+        <div class="stat-lbl">PIPELINE</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="s-bld" style="color:var(--orange)">0</div>
+        <div class="stat-lbl">ACTIVE BUILDS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="s-con" style="color:var(--blue)">0</div>
+        <div class="stat-lbl">CONTACTED</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-label">// LEADS</span>
+        <span class="lead-count" id="lead-count">0</span>
+      </div>
+      <div class="lead-list" id="lead-list"></div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content" id="content">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <path d="M3 9h18M9 21V9"/>
+          </svg>
+        </div>
+        <p>SELECT A LEAD</p>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<script>
+const ST  = ['Not Contacted','Contacted','Meeting Set','Proposal Sent','In Progress','Completed','Passed'];
+const PG  = ['index','menu','about','contact','services','gallery','booking','blog','portfolio','FAQ'];
+const SK  = ['HTML','React','Next.js'];
+const DL  = ['Design','Build','Review','Delivered'];
+
+const leads = [
+  {id:1,name:'Littlefield Appliance Repair',url:'littlefieldappliancerepair.com',phone:'(208) 528-9555',score:18,lo:1200,hi:1800,pr:'HIGH',
+   issues:['No mobile optimization','Outdated design (pre-2018)','Missing contact form','No Google Business integration','Slow load times'],
+   pitch:"Your competitors are booking jobs online while customers bounce off your site. A clean, fast site with online scheduling could double your inbound leads.",
+   scope:['Responsive landing page','Service list with pricing','Online booking form','Google Maps embed','Photo gallery','Contact + call CTA'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:2,name:'Gringos Restaurant & Bar',url:'gringos-rexburg.square.site',phone:'(208) 356-9400',score:12,lo:1500,hi:2200,pr:'HIGH',
+   issues:["Square.site = no custom domain",'No menu SEO','No reservation system','Generic template, zero brand feel','Not indexed on Google'],
+   pitch:"You're running a real restaurant off a Square freebie. Let's build something that shows your vibe and gets you on page one for 'Mexican food Rexburg.'",
+   scope:['Full menu page with photos','Online reservations','Brand-matched design','Custom domain setup','Instagram feed embed','Hours + events section'],
+   status:'Not Contacted',notes:'Preview site already built.',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:3,name:'Rexburg Plumbing & Heating',url:'',phone:'(208) 356-8770',score:0,lo:900,hi:1400,pr:'HIGH',
+   issues:['No web presence at all','Zero Google discoverability','Missing from online directories','Competitors ranking for local searches','No way for customers to request quotes'],
+   pitch:"If someone Googles 'plumber Rexburg' right now, you don't exist. One solid landing page with a quote form puts you on the map overnight.",
+   scope:['Service landing page','Quote request form','Google Business setup','Emergency contact banner','Trust badges / license info','SEO meta setup'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:4,name:'Hunter Repair',url:'',phone:'(208) 360-1178',score:0,lo:1000,hi:1600,pr:'HIGH',
+   issues:['No website','No online presence','Phone-only business','Missing all local SEO','No reviews funnel'],
+   pitch:"Every job you get is word-of-mouth — great. A site with reviews and a clear services list turns that word-of-mouth into a 24/7 sales machine.",
+   scope:['Services overview page','Customer testimonials section','Click-to-call mobile button','Google Reviews integration','Contact + quote form','Basic SEO'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:5,name:'Artesian Sprinklers & Landscaping',url:'',phone:'Directory only',score:0,lo:1200,hi:1800,pr:'HIGH',
+   issues:['Directory listing only','No branded site','No project photo showcase','No seasonal service CTAs','Zero lead capture'],
+   pitch:"Spring is your money season. A site with a before/after gallery and a 'Get a free estimate' form could fill your calendar months out.",
+   scope:['Project photo gallery','Seasonal service pages','Free estimate form','Service area map','Before/after comparisons','Newsletter opt-in'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:6,name:'Rockie Mountain STARS Dance',url:'',phone:'Directory only',score:0,lo:1000,hi:1600,pr:'MEDIUM',
+   issues:['No website','Parents cannot find class schedules online','No registration system','Missing from Google search','No social proof visible'],
+   pitch:"Dance parents search online for class times and registration. Without a site you are losing students to studios that have one.",
+   scope:['Class schedule page','Online registration form','Instructor bios','Performance photos','Parent FAQ','Contact + location'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:7,name:'Independence Fence Idaho',url:'indfenceidaho.com',phone:'',score:35,lo:1500,hi:2500,pr:'MEDIUM',
+   issues:['No quote request form','Gallery has broken images','Not mobile-friendly','Missing service area pages','Weak on-page SEO'],
+   pitch:"You have a decent foundation but customers leave because they cannot get a quote online. Fix the basics and you will convert 3x more visitors.",
+   scope:['Mobile redesign','Online quote request','Project photo gallery fix','Service area pages','Before/after showcase','SEO metadata'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false},
+
+  {id:8,name:'Western Fence Inc.',url:'westernfence.net',phone:'(208) 356-3362',score:42,lo:1800,hi:2800,pr:'MEDIUM',
+   issues:['Dated design (2015 era)','No online quoting','Slow page speed (4.2s load)','No Google Analytics','Missing structured data for local SEO'],
+   pitch:"Your site works but it is costing you leads. Modernizing the design and adding a quote tool alone could increase conversions by 40%.",
+   scope:['Full visual redesign','Speed optimization','Online quote calculator','Analytics setup','Local SEO structured data','Testimonials page'],
+   status:'Not Contacted',notes:'',pages:{},stack:'',delivery:'',invoice:'',paid:false}
+];
+
+let sel = null;
+
+/* ─── Helpers ─────────────────────────────────────────────── */
+function scoreColor(s){
+  if(s===0)  return '#f87171';
+  if(s<30)   return '#fb923c';
+  if(s<50)   return '#facc15';
+  if(s<70)   return '#4ade80';
+  return '#86efac';
+}
+function scoreGrad(s){
+  if(s===0)  return 'linear-gradient(90deg,#ef4444,#f87171)';
+  if(s<30)   return 'linear-gradient(90deg,#f97316,#fb923c)';
+  if(s<50)   return 'linear-gradient(90deg,#eab308,#facc15)';
+  if(s<70)   return 'linear-gradient(90deg,#22c55e,#4ade80)';
+  return 'linear-gradient(90deg,#4ade80,#86efac)';
+}
+function grade(s){
+  if(s<20) return{g:'F',c:'#f87171'};
+  if(s<40) return{g:'D',c:'#fb923c'};
+  if(s<60) return{g:'C',c:'#facc15'};
+  if(s<80) return{g:'B',c:'#4ade80'};
+  return{g:'A',c:'#86efac'};
+}
+function statusCls(st){
+  return ({
+    'Not Contacted':'s-not',
+    'Contacted':'s-con',
+    'Meeting Set':'s-meet',
+    'Proposal Sent':'s-prop',
+    'In Progress':'s-prog',
+    'Completed':'s-comp',
+    'Passed':'s-pass'
+  })[st] || 's-not';
+}
+function mid(l){ return Math.round((l.lo + l.hi) / 2) }
+
+/* ─── Mobile sidebar ──────────────────────────────────────── */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+/* ─── Stats ───────────────────────────────────────────────── */
+function calcStats(){
+  let pip=0, con=0, bld=0, rev=0;
+  leads.forEach(l => {
+    if(l.status !== 'Passed') pip += mid(l);
+    if(['Contacted','Meeting Set','Proposal Sent','In Progress','Completed'].includes(l.status)) con++;
+    if(l.status === 'In Progress') bld++;
+    if(l.paid && l.invoice){
+      const v = parseFloat(l.invoice.replace(/[^0-9.]/g,''));
+      if(!isNaN(v)) rev += v;
+    }
+  });
+  document.getElementById('s-rev').textContent = '$' + Math.round(rev).toLocaleString();
+  document.getElementById('s-pip').textContent = '$' + pip.toLocaleString();
+  document.getElementById('s-bld').textContent = bld;
+  document.getElementById('s-con').textContent = con;
+}
+
+/* ─── Cycle status on pill click ──────────────────────────── */
+function cycleStatus(id, e){
+  e.stopPropagation();
+  const l = leads.find(x => x.id === id);
+  l.status = ST[(ST.indexOf(l.status) + 1) % ST.length];
+  renderList(); calcStats();
+  if(sel === id) renderDetail(id);
+}
+
+/* ─── Render sidebar list ─────────────────────────────────── */
+function renderList(){
+  document.getElementById('lead-count').textContent = leads.length;
+  document.getElementById('lead-list').innerHTML = leads.map(l => {
+    const g = grade(l.score);
+    return `<div class="lead-card${sel===l.id?' active':''}" onclick="selectLead(${l.id})">
+      <div class="lead-top">
+        <div class="lead-name">${l.name}</div>
+        <span class="badge ${l.pr}">${l.pr}</span>
+      </div>
+      <div class="score-row">
+        <div class="score-bar">
+          <div class="score-fill" style="width:${l.score}%;background:${scoreGrad(l.score)}"></div>
+        </div>
+        <span class="score-grade" style="color:${g.c}">${g.g}</span>
+        <span class="score-num">${l.score}/100</span>
+      </div>
+      <div>
+        <span class="status-pill ${statusCls(l.status)}" onclick="cycleStatus(${l.id},event)">${l.status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── Select a lead ───────────────────────────────────────── */
+function selectLead(id){
+  sel = id;
+  renderList();
+  renderDetail(id);
+  if(window.innerWidth <= 768) closeSidebar();
+}
+
+/* ─── Render detail panel ─────────────────────────────────── */
+function renderDetail(id){
+  const l = leads.find(x => x.id === id);
+  if(!l){
+    document.getElementById('content').innerHTML = emptyState();
+    return;
+  }
+  const g = grade(l.score);
+  const showInv = ['In Progress','Completed'].includes(l.status);
+
+  document.getElementById('content').innerHTML = `
+
+    <!-- Pipeline status -->
+    <div class="section">
+      <div class="section-title">PIPELINE STATUS</div>
+      <div class="pipe-steps">
+        ${ST.map(s => {
+          const cls = l.status===s ? 'pipe-step act' : s==='Passed' ? 'pipe-step pass-s' : 'pipe-step';
+          return `<div class="${cls}" onclick="setSt(${id},'${s}')">${s}</div>`;
+        }).join('')}
+      </div>
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="info-key">BUSINESS</div>
+          <div class="info-val">${l.name}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key">SCORE</div>
+          <div class="info-val" style="color:${scoreColor(l.score)}">${l.score}/100 &mdash; ${g.g}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key">${l.url ? 'CURRENT SITE' : 'WEB PRESENCE'}</div>
+          <div class="info-val" style="color:var(--accent)">${l.url || 'No website'}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key">PHONE</div>
+          <div class="info-val">${l.phone || '&mdash;'}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key">PRICE RANGE</div>
+          <div class="info-val" style="color:var(--green)">$${l.lo.toLocaleString()} &ndash; $${l.hi.toLocaleString()}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key">PRIORITY</div>
+          <div class="info-val" style="color:${l.pr==='HIGH'?'var(--red)':'var(--orange)'}">${l.pr}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div class="section">
+      <div class="section-title">SITE ISSUES</div>
+      <div class="issues">
+        ${l.issues.map(i => `<div class="issue"><span class="issue-dot">&#9670;</span>${i}</div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Pitch -->
+    <div class="section">
+      <div class="section-title">PITCH LINE</div>
+      <div class="pitch-box">${l.pitch}</div>
+    </div>
+
+    <!-- Scope -->
+    <div class="section">
+      <div class="section-title">SCOPE</div>
+      <div class="scope-list">
+        ${l.scope.map((s,i) => `<div class="scope-item">
+          <span class="scope-num">${String(i+1).padStart(2,'0')}.</span>${s}
+        </div>`).join('')}
+      </div>
+    </div>
+
+    ${showInv ? `
+    <!-- Project inventory -->
+    <div class="section">
+      <div class="section-title">PROJECT INVENTORY</div>
+
+      <div class="sub-lbl">PAGES BUILT</div>
+      <div class="pages-grid">
+        ${PG.map(p => `<div class="page-check${l.pages[p]?' ck':''}" onclick="togglePage(${id},'${p}')">
+          <input type="checkbox" ${l.pages[p]?'checked':''}>
+          <span>${p}</span>
+        </div>`).join('')}
+      </div>
+
+      <div class="sub-lbl">STACK</div>
+      <div class="stack-opts">
+        ${SK.map(s => `<div class="stack-opt${l.stack===s?' sel':''}" onclick="setSk(${id},'${s}')">${s}</div>`).join('')}
+      </div>
+
+      <div class="sub-lbl">DELIVERABLE STATUS</div>
+      <div class="deliv-steps">
+        ${DL.map((d,i) => {
+          const di = DL.indexOf(l.delivery);
+          const cls = i < di ? 'deliv-step dnd' : d === l.delivery ? 'deliv-step acd' : 'deliv-step';
+          return `<div class="${cls}" onclick="setDel(${id},'${d}')">${d}</div>`;
+        }).join('')}
+      </div>
+
+      <div class="sub-lbl">INVOICE</div>
+      <div class="invoice-row">
+        <span class="inv-cur">$</span>
+        <input class="inv-input" type="text" placeholder="0.00" value="${l.invoice}" oninput="setInv(${id},this.value)">
+        <div class="inv-right">
+          <span class="paid-lbl" style="color:${l.paid?'var(--green)':'var(--text-muted)'}">${l.paid?'PAID':'UNPAID'}</span>
+          <div class="toggle${l.paid?' on':''}" onclick="togglePaid(${id})"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- Notes -->
+    <div class="section">
+      <div class="section-title">NOTES</div>
+      <textarea class="notes-area" placeholder="Type notes here..." oninput="saveNote(${id},this.value)">${l.notes}</textarea>
+    </div>`;
+}
+
+function emptyState(){
+  return `<div class="empty-state">
+    <div class="empty-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+    </div>
+    <p>SELECT A LEAD</p>
+  </div>`;
+}
+
+/* ─── Mutators ────────────────────────────────────────────── */
+function setSt(id,st)    { leads.find(x=>x.id===id).status=st; renderList(); calcStats(); renderDetail(id); }
+function saveNote(id,v)  { leads.find(x=>x.id===id).notes=v; }
+function togglePage(id,p){ const l=leads.find(x=>x.id===id); l.pages[p]=!l.pages[p]; renderDetail(id); }
+function setSk(id,s)     { leads.find(x=>x.id===id).stack=s; renderDetail(id); }
+function setDel(id,d)    { leads.find(x=>x.id===id).delivery=d; renderDetail(id); }
+function setInv(id,v)    { leads.find(x=>x.id===id).invoice=v; calcStats(); }
+function togglePaid(id)  { const l=leads.find(x=>x.id===id); l.paid=!l.paid; calcStats(); renderDetail(id); }
+
+/* ─── Init ────────────────────────────────────────────────── */
+renderList();
+calcStats();
+</script>
+</body>
+</html>

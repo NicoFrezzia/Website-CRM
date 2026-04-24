@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEB.OPS — Rexburg CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ── Topbar ─────────────────────────────────────── -->
+    <header class="topbar">
+
+      <!-- Mobile hamburger -->
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Logo -->
+      <div class="logo">
+        <span class="logo-wordmark">WEB.OPS</span>
+        <div class="logo-divider"></div>
+        <span class="logo-loc">REXBURG ID</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-val" id="s-rev" style="color:var(--green)">$0</div>
+          <div class="stat-lbl">COLLECTED</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="s-pip" style="color:var(--accent)">$0</div>
+          <div class="stat-lbl">PIPELINE</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="s-bld" style="color:var(--orange)">0</div>
+          <div class="stat-lbl">ACTIVE BUILDS</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="s-con" style="color:var(--blue)">0</div>
+          <div class="stat-lbl">CONTACTED</div>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- ── Main layout ──────────────────────────────────── -->
+    <div class="main">
+
+      <!-- Mobile overlay -->
+      <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-label">// LEADS</span>
+          <span class="lead-count" id="lead-count">0</span>
+        </div>
+        <div class="lead-list" id="lead-list"></div>
+      </aside>
+
+      <!-- Detail panel -->
+      <main class="content" id="content">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+          </div>
+          <p>SELECT A LEAD</p>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
